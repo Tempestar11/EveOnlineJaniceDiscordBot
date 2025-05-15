@@ -11,6 +11,7 @@ using System.Net.Http.Headers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
 
 namespace EveOnlineBot
 {
@@ -105,7 +106,21 @@ namespace EveOnlineBot
                         .WithCurrentTimestamp()
                         .WithFooter($"Market: {marketName}");
 
-                    embed.AddField("Total Values", 
+                    var itemsLine = "";
+
+                    var hold = fullAppraisal.GetProperty("items");
+                    foreach (var item in hold.EnumerateArray())
+                    {
+                        var itemQuantity = item.GetProperty("amount").GetInt32();
+                        var name = item.GetProperty("itemType").GetProperty("name").GetString();
+                        itemsLine += $"`{name}` x{itemQuantity}\n";
+                    }
+
+                    embed.WithTitle($"Full Appraisal");
+
+                    embed.AddField("Item List", itemsLine, false);
+                    
+                    embed.AddField("Total Values",
                         $"Sell Value: {totalSellValue:N2} ISK\n" +
                         $"Buy Value: {totalBuyValue:N2} ISK\n" +
                         $"Split Value: {totalSplitValue:N2} ISK\n" +
